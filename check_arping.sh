@@ -3,7 +3,7 @@
 # Original code from
 # https://exchange.nagios.org/directory/Plugins/System-Metrics/Networking/check_arp/details
 
-ETH_DEV="eth0"
+IFACE="eth0"
 EXPECTED_MAC=""
 
 while getopts "H:I:M:" OPTION;
@@ -12,8 +12,8 @@ do
     "H") # Assign hostname
       HOST_NAME="$OPTARG"
     ;;
-    "I") # Assign hostname
-      ETH_DEV="$OPTARG"
+    "I") # Outbound interface
+      IFACE="$OPTARG"
     ;;
     "M") # Assign expected MAC address
       EXPECTED_MAC="$OPTARG"
@@ -32,7 +32,7 @@ if [ -z $HOST_NAME ]; then
 else
   # -D flag - has strange behaviour when there are duplicated addresses.
   # Exit is non-zero, but text still reports only 1 instead of 2 responses.
-  EXIT_STRING=$(arping -b -I $ETH_DEV -c 1 $HOST_NAME)
+  EXIT_STRING=$(arping -b -I $IFACE -c 1 $HOST_NAME)
   EXIT_CODE=$?
   if [ $EXIT_CODE -eq 0 ]; then
     if [ -z "$(echo "$EXIT_STRING" | grep '^Received 1 response' )" ]; then
@@ -53,7 +53,7 @@ else
       fi
     fi
   else
-    EXIT_STRING="WARNING: Unreachable host $HOST_NAME via $ETH_DEV\n"
+    EXIT_STRING="WARNING: Unreachable host $HOST_NAME via $IFACE\n"
     EXIT_CODE=1
   fi
 fi
